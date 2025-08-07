@@ -1,0 +1,42 @@
+-- Create database
+CREATE DATABASE IF NOT EXISTS car_rental;
+USE car_rental;
+
+-- Create users table
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(50) NOT NULL, -- Consider hashing in production
+    role ENUM('customer', 'admin') NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    address VARCHAR(200) NOT NULL
+);
+
+-- Create cars table
+CREATE TABLE cars (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    model VARCHAR(100) NOT NULL,
+    car_type VARCHAR(50) NOT NULL,
+    daily_rate DECIMAL(10, 2) NOT NULL,
+    availability INT NOT NULL DEFAULT 0,
+    CONSTRAINT chk_availability CHECK (availability >= 0)
+);
+
+-- Create bookings table
+CREATE TABLE bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    car_id INT NOT NULL,
+    pick_up_date DATE NOT NULL,
+    drop_off_date DATE NOT NULL,
+    total_cost DECIMAL(10, 2) NOT NULL,
+    status ENUM('pending', 'confirmed', 'completed', 'canceled') NOT NULL DEFAULT 'pending',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+);
+
+-- Add indexes for performance
+CREATE INDEX idx_username ON users(username);
+CREATE INDEX idx_car_availability ON cars(availability);
+CREATE INDEX idx_booking_status ON bookings(status);
